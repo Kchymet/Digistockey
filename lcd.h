@@ -67,7 +67,7 @@ extern "C" {
     void PrintString(char*);
     void PrintFloat(float);
     void PrintEmptyLine();
-    void PrintStockInfo(char*,float,float,float);
+    void PrintStockInfo(char*,float,float,float, float);
     void initLCD();
 
 #ifdef	__cplusplus

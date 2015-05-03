@@ -81,4 +81,6 @@ void printStock( print_t *settings, char* ticker, size_t length, float value, fl
     printString(settings,"Close:  ", 8);
     printFloat(settings,close);
     printChar(settings,'\n');
+    printChar(settings,'\n');
+    printChar(settings,'\n');
 }

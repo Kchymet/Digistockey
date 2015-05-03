@@ -15,16 +15,16 @@ extern "C" {
 #include "printer.h"
 
     typedef enum{
-        UP,
-        DOWN,
-        LEFT,
-        RIGHT,
-        MIDDLE
-    } direction_e;
+        DISPLAY,
+        MENU
+    } display_t;
+    typedef enum{
+        PORTFOLIO,
+        HOTLIST
+    } stocktype_t;
 
     void processUI( print_t* );
-
-
+    
 #ifdef	__cplusplus
 }
 #endif

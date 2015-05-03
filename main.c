@@ -21,10 +21,10 @@ print_t pbuff_settings;
 
 int main(int argc, char** argv) {
 
-    initUI();
-    initPrinter();
     initLCD();
-
+    initPrinter();
+    initUI();
+    
     while( 1 )
     {
         processUI( &pbuff_settings );

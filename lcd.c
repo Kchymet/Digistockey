@@ -10,11 +10,6 @@
 #include "delay.h"
 
 void writeEN(){
-    //LCDRD = 1; //tell the LCD to stop outputting
-    //delayMs(1);
-    //DIR = 1; //change direction so that you can output
-    //delayMs(1);
-    //TRISE = 0x00; //don't output until after direction is yours
     LCDCE = 0; //enable LCD chip
     LCDWR = 0; //enable write to LCD
 }
@@ -25,10 +20,7 @@ void writeDIS(){
 }
 
 void LCDStat(){
-    /*readEN();
-    while(!(D0 && D1)); //wait until both D0 and D1 high
-    readDIS();*/
-    delayNs(1);  //TODO Change later to 1, leaving it slow while I'm working
+    delayNs(2);  //TODO Change later to 1, leaving it slow while I'm working
 }
 
 void sendByte( char b ){
@@ -93,11 +85,6 @@ void setAddrPointer( char first , char second ){
 void DAWSet(){ sendCommand( 0xB0 ); }
 void DARSet(){ sendCommand( 0xB1 ); }
 void DAReset(){
-    //DAW is on, but sendCommand checks LCDstat
-        //LCD status waits for STA0 and STA1, which are undefined
-    //DAWStat();
-    //LCDCD = 1;
-    //sendByte(0xB2);
     sendCommand(0xB2);
 }
 
@@ -189,18 +176,6 @@ void setCursorPointer( char col , char row ){
 
 void setDisplayMode(){
     sendCommand(0x94);
-    /*
-    Low Nibble = 0 - Display Off
-    Low Nibble = 4 - Text RAM Only, no cursor
-    Low Nibble = 6 - Text RAM only, cursor on, cursor blink off
-    Low Nibble = 7 - Text RAM only, cursor on, cursor blink on
-    Low Nibble = 8 - Graphics RAM only, no cursor
-    Low Nibble = A - Graphics RAM only, cursor on, cursor blink off
-    Low Nibble = B - Graphics RAM only, cursor on, cursor blink on
-    Low Nibble = C - Text and Graphics RAM, no cursor
-    Low Nibble = E - Text and Graphics RAM, cursor on, cursor blink off
-    Low Nibble = F - Text and Graphics RAM, cursor on, cursor blink on
-    */
 }
 
 void PrintInt  (int val){
@@ -263,7 +238,39 @@ void PrintEmptyLine(){
     // 20 spaces per line
     PrintString("                    ");
 }
-void PrintStockInfo(char* ticker, float value, float open, float close){
+
+void PrintMenu(char *menu, int select){
+    clearDisplay();
+    setAddrPointer( 0x00 , 0x00 );
+    size_t line=0, chs = 0, i=0;
+    if(select==line){ PrintChar('>'); }
+    else{ PrintChar(' '); }
+    chs++;
+    while(menu[i]!='\0'){
+        if(menu[i]=='\n'){
+            while(chs++<20){
+                PrintChar(' ');
+            }
+            if(++line == select){
+                PrintChar('>');
+            }
+            else{ PrintChar(' '); }
+            chs = 1;
+        }
+        else{
+            chs++;
+            PrintChar(menu[i]);
+        }
+        i++;
+    }
+    PrintEmptyLine();
+    PrintEmptyLine();
+    PrintEmptyLine();
+    PrintEmptyLine();
+    PrintEmptyLine();
+}
+
+void PrintStockInfo(char* ticker, float value, float open, float close, float predict){
     int negflag;
     float change = value - open;
     if(change < 0){
@@ -274,31 +281,42 @@ void PrintStockInfo(char* ticker, float value, float open, float close){
         negflag = 0;
     }
 
-    clearDisplay();
     setAddrPointer( 0x00 , 0x00 );
     PrintString(" Stock     Report   ");
     PrintEmptyLine();
     PrintEmptyLine();
-    PrintString("   Ticker:");
+    PrintString("   Ticker: ");
     PrintString(ticker);
-    PrintString("      ");
+    int i=0;
+    while(ticker[i++] != '\0'){}
+    while(i++ <= 5){ PrintString(" "); }
+    PrintString("    ");
     PrintEmptyLine();
-    PrintString("   Value:");
+    PrintString("   Value: ");
     PrintFloat(value);
-    PrintString("     ");
-    PrintString("   Open: ");
+    PrintString("    ");
+    PrintString("   Open:  ");
     PrintFloat(open);
-    PrintString("     ");
-    PrintString("   Close:");
+    PrintString("    ");
+    PrintString("   Close: ");
     PrintFloat(close);
-    PrintString("      ");
-    PrintEmptyLine();
+    PrintString("     ");
+    //PrintEmptyLine();
     PrintString(" Change:");
     if(negflag){
         PrintString("-");
     }
+    else{ PrintString("+"); }
     PrintFloat(change);
-    PrintString("      ");
+    PrintString("    ");
+    PrintString(" Predict: ");
+    PrintFloat(predict);
+    PrintString("    ");
+    PrintEmptyLine();
+    PrintString("       ^ Menu       ");
+    PrintString(" <Prev *Print Next> ");
+    PrintString("       v Menu       ");
+    PrintEmptyLine();
 }
 
 void initLCD(){
@@ -344,7 +362,7 @@ void initLCD(){
     clearDisplay(); //why isn't the display clearing
     setAddrPointer( 0x00 , 0x00 );
 
-    PrintStockInfo("ATVI", 122.72,2.81, 22.8);
+    //PrintStockInfo("ATVI", 122.72,2.81, 22.8);
 
     delayMs(50);
     LCDCE = 0; //enable chip
